@@ -15,16 +15,6 @@ import sklearn.neighbors
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D as a3d
 
-import colorlover as cl
-import plotly.offline as po
-import plotly.graph_objs as go
-import plotly
-plotly.offline.init_notebook_mode()
-# In[19]:
-
-
-
-# In[2]:
 
 def Translate(points, direction, magnitude):
     M = np.zeros((3,3))
@@ -59,94 +49,6 @@ def Rotate(pts, pointIndex, axis, angle):
     return points
 
 
-# In[ ]:
-
-def PlotLines(A):
-    fig = plt.figure()
-    ax = fig.gca(projection='3d')
-    plt.hold(True)
-    for i in xrange(1, 3):
-        xs1 = np.array([A[0,0], A[i,0]])
-        ys1 = np.array([A[0,1], A[i,1]])
-        zs1 = np.array([A[0,2], A[i,2]])
-        print xs
-        print ys
-        print zs
-        ax.plot(xs, ys, zs, '-o')
-    plt.show()
-
-
-# In[ ]:
-
-def PlotlyPlot(A):
-    xs1 = np.array([A[0,0], A[1,0]])
-    ys1 = np.array([A[0,1], A[1,1]])
-    zs1 = np.array([A[0,2], A[1,2]])
-    xs2 = np.array([A[0,0], A[2,0]])
-    ys2 = np.array([A[0,1], A[2,1]])
-    zs2 = np.array([A[0,2], A[2,2]])
-
-    trace1 = go.Scatter3d(
-        x=[xs1[0],xs1[1]],
-        y=[ys1[0],ys1[1]],
-        z=[zs1[0],zs1[1]],
-        mode='lines+markers',
-        name='start ref',
-        marker=dict(
-            size=5,
-            line=dict(
-                color='green',
-                width=2
-            ),
-            color=cl.scales['3']['qual']['Dark2'],
-            opacity=0.8
-        )
-    )
-
-    trace2 = go.Scatter3d(
-        x=[xs2[0],xs2[1]],
-        y=[ys2[0],ys2[1]],
-        z=[zs2[0],zs2[1]],
-        mode='lines+markers',
-        name='start ref',
-        marker=dict(
-            size=5,
-            line=dict(
-                color='green',
-                width=2
-            ),
-            color=cl.scales['3']['qual']['Dark2'],
-            opacity=0.8
-        )
-    )
-
-    layout = go.Layout(
-        scene=dict(
-            aspectratio=dict(
-                y=1,
-                x=1,
-                z=1
-                ),
-            xaxis=dict(
-                autorange=False,
-                range=[-5, 5]
-            ),
-            yaxis=dict(
-                autorange=False,
-                range=[-5, 5]
-            ),
-            zaxis=dict(
-                autorange=False,
-                range=[-5, 5]
-            )
-        )
-    )
-
-    fig = go.Figure(data=[trace1, trace2], layout=layout)
-    po.iplot(fig)
-
-
-# In[4]:
 
 def getCenterOfMass(points):
     return np.array([np.mean(points[:,0]), np.mean(points[:,1]), np.mean(points[:,2])])
