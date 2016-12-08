@@ -3,6 +3,8 @@ import math
 from copy import deepcopy
 import time
 
+defaultRanges = np.array([(10, -20), (0, -20), (10,-20), (math.pi, 0), (math.pi, -math.pi), (math.pi, 0), (math.pi, -math.pi)])
+defaultNumBins = np.array([20, 20, 20, 5, 5, 5, 5])
 
 def Translate(points, axis, magnitude):
     M = np.zeros((3,3))
@@ -76,9 +78,6 @@ def frameToState(p1, p2, p3, l1, l2, l3):
     center = getCenterOfMass(proteinBase)
     M = getTransformationMatrix(center, proteinBase)
     
-    tP1 = np.matmul(M, p1)
-    tP2 = np.matmul(M, p2)
-    tP3 = np.matmul(M, p3)
     tL1 = np.matmul(M, l1)
     tL2 = np.matmul(M, l2)
     tL3 = np.matmul(M, l3)
@@ -94,17 +93,57 @@ def frameToState(p1, p2, p3, l1, l2, l3):
     state = np.array([ligandPosition[0], ligandPosition[1], ligandPosition[2], theta2, phi2, theta3, phi3])
     return state
     
-def discretizeState(state, scaleVector):
-    discreteState = np.round(np.divide(state, scaleVector))
-    return discreteState
+    
+def discretizeStates(states, binScales):
+    states = np.round(states/binScales)
+    states = states*binScales
+    return states
 
-def getScaleVector(xsize, xsteps, ysize, ysteps, zsize, zsteps, rotsteps):
-    #Divide by 2 to account for positive and negative
-    xscale = xsize/(xsteps/2)
-    yscale = ysize/(ysteps/2)
-    zscale = zsize/(zsteps/2)
-    rotscale = math.pi/(rotsteps/2)
-    return np.array([xscale, yscale, zscale, rotscale, rotscale, rotscale, rotscale])
+def getBinScales(ranges, numBins):
+    binWidths = np.abs(ranges[:,0]) + np.abs(ranges[:,1])
+    binScales = binWidths/numBins
+    return binScales
+
+def createStates(data):
+    n = data['receptor_1_pos'].shape[0]
+    states = np.zeros((n,7))
+    xsize = 50
+    xsteps = 20
+    ysize = 50
+    ysteps = 20
+    zsize = 50
+    zsteps = 20
+    rotstep = 5
+    
+    r1Pos = data['receptor_1_pos']
+    r2Pos = data['receptor_2_pos']
+    r3Pos = data['receptor_3_pos']
+    cLPos = data['center_ligand_pos']
+    s1Pos = data['side1_ligand_pos']
+    s2Pos = data['side2_ligand_pos']
+
+    for i in xrange(n):
+        p1 = r1Pos[i]
+        p2 = r2Pos[i]
+        p3 = r3Pos[i]
+        l1 = cLPos[i]
+        l2 = s1Pos[i]
+        l3 = s2Pos[i]
+        state = frameToState(p1, p2, p3, l1, l2, l3)
+        states[i,:] = state   
+    return states
+
+def filterDiscreteStates(discreteStates, ranges, binScales):
+    filterBooleans = np.ones((discreteStates.shape[0],)).astype(bool)
+    scaledRanges = np.transpose(np.round(ranges.T/binScales)*binScales)
+    for i in xrange(discreteStates.shape[0]):
+        curState = discreteStates[i,:]
+        for j in xrange(ranges.shape[0]):
+            if (curState[j] > scaledRanges[j][0]) or curState[j] < (scaledRanges[j][1]):
+                filterBooleans[i] = False
+                break
+    filteredStates = discreteStates[filterBooleans]
+    return filteredStates
 
 # http://svn.gna.org/svn/relax/1.3/maths_fns/coord_transform.py
 
