@@ -44,12 +44,18 @@ def Rotate(points, pointIndex, axis, angle):
 
 
 def getCenterOfMass(points):
+    '''
+    Finds the center of mass of the receptor points
+    '''
     return np.array([np.mean(points[:, 0]),
                      np.mean(points[:, 1]),
                     np.mean(points[:, 2])])
 
 
 def getTransformationMatrix(center, points):
+    '''
+    Given the points on the receptor, defines the axes
+    '''
     primaryPoint = points[0, :]
     secondaryPoint = points[1, :]
     v1 = primaryPoint - center
@@ -62,6 +68,9 @@ def getTransformationMatrix(center, points):
 
 
 def frameToState(p1, p2, p3, l1, l2, l3):
+    '''
+    Converts 6 points into the R^7 state (x,y,z,angles)
+    '''
     proteinBase = np.array([p1, p2, p3])
     center = getCenterOfMass(proteinBase)
     M = getTransformationMatrix(center, proteinBase)
@@ -84,11 +93,23 @@ def frameToState(p1, p2, p3, l1, l2, l3):
 
 
 def discretizeStates(states, binScales):
+    '''
+    Takes R^7 raw values and discretizes.
+    Discretizes to bins of sizes binScales.
+    This is for computing rewards
+    '''
     states = np.round(states/binScales)
     states = states*binScales
     return states
 
+
 def discretizeUnscaledStates(states, ranges, binScales):
+    '''
+    Shifts up by minimum (so nothing is negative)
+    Rounds to the nearest bin
+    Divides so that index starts at 0 and increments
+    This is to be used for input to transition matrices etc
+    '''
     mins = ranges[:, 1]
     states -= np.transpose(mins)
     states = np.round(states/binScales)
@@ -102,6 +123,11 @@ def getBinScales(ranges, numBins):
 
 
 def createStates(data):
+    '''
+    Takes in a saved data file and constructs a state
+    for each frame, but does not do any discretization.
+    Returns the raw R^7 numpy array for each frame.
+    '''
     n = data['receptor_1_pos'].shape[0]
     states = np.zeros((n, 7))
 
@@ -125,6 +151,10 @@ def createStates(data):
 
 
 def filterDiscreteStates(discreteStates, ranges, binScales):
+    '''
+    Filter scaled states.
+    Unused.
+    '''
     filterBooleans = np.ones((discreteStates.shape[0],)).astype(bool)
     scaledRanges = np.transpose(np.round(ranges.T/binScales)*binScales)
     for i in xrange(discreteStates.shape[0]):
@@ -138,6 +168,10 @@ def filterDiscreteStates(discreteStates, ranges, binScales):
 
 
 def filterUnscaledDiscreteStates(discreteStates, numBins):
+    '''
+    Filter UNscaled states (ie not real coordinates)
+    Rejects points outside the range as defined by numBins.
+    '''
     filterBooleans = np.ones((discreteStates.shape[0],)).astype(bool)
     n = discreteStates.shape[0]
     m = discreteStates.shape[1]
@@ -147,8 +181,8 @@ def filterUnscaledDiscreteStates(discreteStates, numBins):
             if (curState[j] >= numBins[j]) or (curState[j] < 0):
                 filterBooleans[i] = False
                 break
-    filteredStates = discreteStates[filterBooleans]
-    return filteredStates, filterBooleans
+    # filteredStates = discreteStates[filterBooleans]
+    return discreteStates, filterBooleans
 
 
 # http://svn.gna.org/svn/relax/1.3/maths_fns/coord_transform.py
@@ -293,6 +327,7 @@ if __name__ == "__main__":
     end = time.time()
     print end - start
 
+
     testStates = np.copy(states)
     ranges = np.array([(10, -20), (0, -20), (10, -20), (math.pi, 0),
                        (math.pi, -math.pi), (math.pi, 0), (math.pi, -math.pi)])
@@ -310,15 +345,18 @@ if __name__ == "__main__":
     print 'Minimum state values'
     print np.min(filteredStates, axis=0)
 
+    realStates = discretizeStates(states, binScales)
     print "States discretized"
-    tree = generateDistTree(discreteStates, 0.5)
+    tree = generateDistTree(realStates, 0.5)
     print "Tree generated"
-    rewards = generateRewards(discreteStates, tree, 0.5, 0.5)[filterBooleans]
+    rewards = generateRewards(realStates, tree, 0.5, 0.5)
     print "Rewards generated"
-    actions = list(compress(computeActions(discreteStates), filterBooleans))
+
+    actions = computeActions(realStates)
     print "actions generated"
     np.savez('trajA_mdp_data',
         rewards=rewards,
         actions=actions,
-        discreteStates=filteredStates,
-        binScales=binScales)
+        discreteStates=discreteStates,
+        binScales=binScales,
+        filtered=filterBooleans)
