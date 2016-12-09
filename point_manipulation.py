@@ -251,7 +251,7 @@ def generateRewards(discreteStates, tree, l1, l2):
 
 def computeActions(episode):
     actions = []
-    for i in range(episode.shape[0]-2):
+    for i in range(episode.shape[0]-1):
         s = episode[i:i+1, :]
         sp = episode[i+1:i+2, :]
         actions.append((int(np.sign(sp-s)[0][np.argmax(abs(sp-s))]), np.argmax(abs(sp - s))))
@@ -281,3 +281,8 @@ if __name__ == "__main__":
     print "Rewards generated"
     actions = computeActions(discreteStates)
     print "actions generated"
+    np.savez('trajA_mdp_data',
+        rewards=rewards,
+        actions=actions,
+        discreteStates=discreteStates,
+        binScales=binScales)
