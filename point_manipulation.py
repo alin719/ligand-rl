@@ -360,7 +360,7 @@ if __name__ == "__main__":
     actions = computeActions(realStates)
     print "actions generated"
 
-    np.savez('~/cs238/ligand-rl/' + dataId + '_data',
+    np.savez('/home/rbedi/cs238/ligand-rl/' + dataId + '_data',
              rewards=rewards,
              actions=actions,
              discreteStates=discreteStates,
