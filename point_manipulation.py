@@ -325,7 +325,7 @@ if __name__ == "__main__":
     dataFile = sys.argv[1]
     MAX_STATE = int(sys.argv[2])
 
-    dataId = ''.join(dataFile.split('-')[1:3])
+    dataId = ''.join(dataFile.split('/')[-1].split('-')[1:3])
 
     data = np.load(dataFile)
     start = time.time()
@@ -360,7 +360,7 @@ if __name__ == "__main__":
     actions = computeActions(realStates)
     print "actions generated"
 
-    np.savez(dataId + '_data',
+    np.savez('~/cs238/ligand-rl/' + dataId + '_data',
              rewards=rewards,
              actions=actions,
              discreteStates=discreteStates,
