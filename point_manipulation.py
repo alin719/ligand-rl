@@ -281,3 +281,8 @@ if __name__ == "__main__":
     print "Rewards generated"
     actions = computeActions(discreteStates)
     print "actions generated"
+    np.savez('trajA_mdp_data',
+        rewards=rewards,
+        actions=actions,
+        discreteStates=discreteStates,
+        binScales=binScales)
