@@ -5,7 +5,7 @@ import time
 import sklearn.neighbors
 from collections import defaultdict
 import operator
-from itertools import compress
+import sys
 
 defaultRanges = np.array([(10, -20), (0, -20), (10, -20),
                           (math.pi, 0), (math.pi, -math.pi),
@@ -288,11 +288,11 @@ def generateRewards(discreteStates, tree, l1, l2):
     l2: (-) weighting of distance to most frequent state reward
     '''
     neighboringStateRewards = np.zeros((discreteStates.shape[0],))
-    # for s in range(discreteStates.shape[0]):
-    #     if s % 100 == 0:
-    #         print 'On state {}'.format(s)
-    #     dist, ind = tree.kneighbors(X=discreteStates[s, :].reshape(1, -1), n_neighbors=6, return_distance=True)
-    #     neighboringStateRewards[s] = np.sum(dist)
+    for s in range(discreteStates.shape[0]):
+        if s % 100 == 0:
+            print 'On state {}'.format(s)
+        dist, ind = tree.kneighbors(X=discreteStates[s, :].reshape(1, -1), n_neighbors=6, return_distance=True)
+        neighboringStateRewards[s] = np.sum(dist)
 
     mostFreqRewards = np.zeros((discreteStates.shape[0],))
     mostFreqState = mostFrequentState(discreteStates)
@@ -321,7 +321,12 @@ def reconstructStates(discreteStates, ranges, binScales):
     return reconstructedStates
 
 if __name__ == "__main__":
-    data = np.load('trajA_coords.npz')
+
+    dataFile = sys.argv[1]
+
+    dataId = ''.join(dataFile.split('-')[1:3])
+
+    data = np.load(dataFile)
     start = time.time()
     states = createStates(data)
     end = time.time()
@@ -338,7 +343,7 @@ if __name__ == "__main__":
 
     # For now, only look at the first 1k states.
     # discreteStates = discretizeStates(testStates, binScales)[0:1000]
-    discreteStates = discretizeUnscaledStates(testStates, ranges, binScales)[0:1000]
+    discreteStates = discretizeUnscaledStates(testStates, ranges, binScales)[0:2000]
     filteredStates, filterBooleans = filterUnscaledDiscreteStates(discreteStates, numBins)
     print 'Maximum state values'
     print np.max(filteredStates, axis=0)
@@ -354,9 +359,9 @@ if __name__ == "__main__":
 
     actions = computeActions(realStates)
     print "actions generated"
-    np.savez('trajA_mdp_data',
-        rewards=rewards,
-        actions=actions,
-        discreteStates=discreteStates,
-        binScales=binScales,
-        filtered=filterBooleans)
+    np.savez(dataId + '_data',
+             rewards=rewards,
+             actions=actions,
+             discreteStates=discreteStates,
+             binScales=binScales,
+             filtered=filterBooleans)
