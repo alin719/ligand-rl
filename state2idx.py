@@ -17,7 +17,23 @@ def stateToIdx(state):
         idx += toAdd
     return idx
 
+def actionToIdx(action):
+    if max(action) == 0 and min(action) == 0: 
+        return 0
+    return (action[0] + 1)/2 + (2 * action[1]) + 1
+
+def idxToAction(idx):
+    if idx == 0: 
+        return (0,0)
+    idx -= 1
+    return ((idx%2)*2 - 1, idx/2)
+
+
+
 test = [5,14,12,3,1,2,1]
 print stateToIdx(test)
 print idxToState(stateToIdx(test)).astype(int)
 
+action = (-1, 3)
+print actionToIdx(action)
+print idxToAction(actionToIdx(action))
