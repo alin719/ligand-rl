@@ -87,6 +87,12 @@ def discretizeStates(states, binScales):
     states = states*binScales
     return states
 
+def discretizeUnscaledStates(states, ranges, binScales):
+    mins = ranges[:, 1]
+    states -= np.transpose(mins)
+    states = np.round(states/binScales)
+    return states
+
 
 def getBinScales(ranges, numBins):
     binWidths = np.abs(ranges[:, 0]) + np.abs(ranges[:, 1])
@@ -124,6 +130,19 @@ def filterDiscreteStates(discreteStates, ranges, binScales):
         curState = discreteStates[i, :]
         for j in xrange(ranges.shape[0]):
             if (curState[j] > scaledRanges[j][0]) or curState[j] < (scaledRanges[j][1]):
+                filterBooleans[i] = False
+                break
+    filteredStates = discreteStates[filterBooleans]
+    return filteredStates
+
+def filterUnscaledDiscreteStates(discreteStates, numBins):
+    filterBooleans = np.ones((discreteStates.shape[0],)).astype(bool)
+    n = discreteStates.shape[0]
+    m = discreteStates.shape[1]
+    for i in xrange(n):
+        curState = discreteStates[i, :]
+        for j in xrange(m):
+            if (curState[j] >= numBins[j]) or (curState[j] < 0):
                 filterBooleans[i] = False
                 break
     filteredStates = discreteStates[filterBooleans]
@@ -257,6 +276,12 @@ def computeActions(episode):
         actions.append((int(np.sign(sp-s)[0][np.argmax(abs(sp-s))]), np.argmax(abs(sp - s))))
     return actions
 
+def reconstructStates(discreteStates, ranges, binScales):
+    reconstructStates = discreteStates*binScales
+    mins = ranges[:,1]
+    reconstructedStates = reconstructedStates - mins
+    return reconstructedStates 
+
 if __name__ == "__main__":
     data = np.load('trajA_coords.npz')
     start = time.time()
@@ -273,7 +298,11 @@ if __name__ == "__main__":
     print binScales
 
     # For now, only look at the first 1k states.
-    discreteStates = discretizeStates(testStates, binScales)[0:1000]
+    # discreteStates = discretizeStates(testStates, binScales)[0:1000]
+    discreteStates = discretizeUnscaledStates(testStates, ranges, binScales)[0:1000]
+    filteredStates = filterUnscaledDiscreteStates(discreteStates, numBins)
+
+    print np.max(filteredStates, axis=0)
     print "States discretized"
     tree = generateDistTree(discreteStates, 0.5)
     print "Tree generated"
