@@ -1,8 +1,3 @@
-
-# coding: utf-8
-
-# In[82]:
-
 import numpy as np
 
 bases = np.array([20, 20, 20, 5, 5, 5, 5, 1])
@@ -12,8 +7,7 @@ def idxToState(idx):
     state = np.zeros((len(bases)-1, 1))
     for i in range(len(mods)-2,-1,-1):
         state[i] = (idx % mods[i]) / mods[i+1]
-        idx -= state[i]
-        print idx
+        idx -= (idx % mods[i])
     return state
     
 def stateToIdx(state):
@@ -23,10 +17,7 @@ def stateToIdx(state):
         idx += toAdd
     return idx
 
-
-# In[83]:
-
 test = [5,14,12,3,1,2,1]
-stateToIdx(test)
-idxToState(stateToIdx(test)).astype(int)
+print stateToIdx(test)
+print idxToState(stateToIdx(test)).astype(int)
 

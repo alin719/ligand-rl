@@ -301,8 +301,11 @@ if __name__ == "__main__":
     # discreteStates = discretizeStates(testStates, binScales)[0:1000]
     discreteStates = discretizeUnscaledStates(testStates, ranges, binScales)[0:1000]
     filteredStates = filterUnscaledDiscreteStates(discreteStates, numBins)
-
+    print 'Maximum state values'
     print np.max(filteredStates, axis=0)
+    print 'Minimum state values'
+    print np.min(filteredStates, axis=0)
+
     print "States discretized"
     tree = generateDistTree(discreteStates, 0.5)
     print "Tree generated"
@@ -313,5 +316,5 @@ if __name__ == "__main__":
     np.savez('trajA_mdp_data',
         rewards=rewards,
         actions=actions,
-        discreteStates=discreteStates,
+        discreteStates=filteredStates,
         binScales=binScales)
