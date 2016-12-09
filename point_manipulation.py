@@ -358,5 +358,6 @@ if __name__ == "__main__":
         rewards=rewards,
         actions=actions,
         discreteStates=discreteStates,
+        filteredStates=filteredStates,
         binScales=binScales,
         filtered=filterBooleans)

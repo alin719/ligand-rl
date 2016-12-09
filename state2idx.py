@@ -30,10 +30,10 @@ def idxToAction(idx):
 
 
 
-test = [5,14,12,3,1,2,1]
-print stateToIdx(test)
-print idxToState(stateToIdx(test)).astype(int)
+# test = [5,14,12,3,1,2,1]
+# print stateToIdx(test)
+# print idxToState(stateToIdx(test)).astype(int)
 
-action = (-1, 3)
-print actionToIdx(action)
-print idxToAction(actionToIdx(action))
+# action = (-1, 3)
+# print actionToIdx(action)
+# print idxToAction(actionToIdx(action))
