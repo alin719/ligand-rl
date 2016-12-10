@@ -323,7 +323,7 @@ def reconstructStates(discreteStates, ranges, binScales):
 
 def loadFiles(MAX_STATE):
     import glob
-    PATH = '/home/rbedi/cs238/ligand-rl/data/*npz'
+    PATH = '/home/rbedi/cs238/ligand-rl/trajA_coords.npz'
     files = glob.glob(PATH)
     allStates = np.zeros((0, 7))
     for file in files:
@@ -331,9 +331,10 @@ def loadFiles(MAX_STATE):
         data = np.load(file)
         start = time.time()
         states = createStates(data)[0:MAX_STATE]
-        allStates = np.vertcat(allStates, states)
+        allStates = np.vstack((allStates, states))
         end = time.time()
         print end - start
+    return allStates
 
 if __name__ == "__main__":
 
@@ -349,8 +350,6 @@ if __name__ == "__main__":
     # print end - start
 
     states = loadFiles(2000)
-    import pdb
-    pdb.set_trace()
 
     testStates = np.copy(states)
     ranges = np.array([(10, -20), (0, -20), (10, -20), (math.pi, 0),
@@ -360,10 +359,14 @@ if __name__ == "__main__":
     binScales = binWidths/numBins
     print binScales
 
-    # For now, only look at the first 1k states.
+    # For now, only look at the first 2k states.
     # discreteStates = discretizeStates(testStates, binScales)[0:1000]
     discreteStates = discretizeUnscaledStates(testStates, ranges, binScales)
     filteredStates, filterBooleans = filterUnscaledDiscreteStates(discreteStates, numBins)
+
+    import pdb
+    pdb.set_trace()
+
     print 'Maximum state values'
     print np.max(filteredStates, axis=0)
     print 'Minimum state values'
@@ -379,7 +382,7 @@ if __name__ == "__main__":
     actions = computeActions(realStates)
     print "actions generated"
 
-    np.savez('/home/rbedi/cs238/ligand-rl/' + dataId + '_data',
+    np.savez('/home/rbedi/cs238/ligand-rl/' + 'all_A_B' + '_data',
              rewards=rewards,
              actions=actions,
              discreteStates=discreteStates,

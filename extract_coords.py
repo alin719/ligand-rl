@@ -57,10 +57,10 @@ align_frames(0, 0)
 if sim_id == 'A' or sim_id == 'B':
     # Extract three coordinates of the ligand
     # These values are specific to trajectory A
-    ligand_pos = export_sel(0, 'resname C73P')
-    center_ligand_pos = ligand_pos[:, 18, :]    # corresponds to C2 on C73P (index 2230 in A.mae)
-    side1_ligand_pos = ligand_pos[:, 20, :]    # corresponds to C on C73P (index 2232 in A.mae)
-    side2_ligand_pos = ligand_pos[:, 0, :]     # corresponds to C on C73P (index 2212 in A.mae)
+    ligand_pos = export_sel(0, 'resname C73P')  # VMD starts the ligand at 2211
+    center_ligand_pos = ligand_pos[:, 19, :]    # corresponds to C2 on C73P (index 2230 in VMD)
+    side1_ligand_pos = ligand_pos[:, 21, :]     # corresponds to C on C73P  (index 2232 in VMD)
+    side2_ligand_pos = ligand_pos[:, 1, :]      # corresponds to C on C73P  (index 2212 in VMD)
 
     # Extract the centroid of the binding site
     # These values are also specific to trajectory A
