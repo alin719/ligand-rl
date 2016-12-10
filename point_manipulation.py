@@ -331,7 +331,7 @@ def reconstructStates(discreteStates, ranges, binScales):
 
 def loadFiles(MAX_STATE):
     import glob
-    PATH = 'C:/Users/Alex Lin/Documents/AA228/finalproject/ligand-rl/data/*npz'
+    PATH = '/home/rbedi/cs238/ligand-rl/data/*npz'
     files = glob.glob(PATH)
     allStates = np.zeros((0, 7))
     for file in files:
@@ -395,15 +395,12 @@ if __name__ == "__main__":
     discreteStates = discretizeUnscaledStates(testStates, ranges, binScales)
     filteredStates, filterBooleans = filterUnscaledDiscreteStates(discreteStates, numBins)
 
-    # import pdb
-    # pdb.set_trace()
-
     print 'Maximum state values'
     print np.max(filteredStates[filterBooleans], axis=0)
     print 'Minimum state values'
     print np.min(filteredStates[filterBooleans], axis=0)
 
-    realStates = discretizeStates(states, binScales)[0:maxSamples]
+    realStates = discretizeStates(states, binScales)
     print "States discretized"
     tree = generateDistTree(realStates, 0.5)
     print "Tree generated"
