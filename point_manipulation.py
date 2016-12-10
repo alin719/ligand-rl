@@ -332,6 +332,7 @@ if __name__ == "__main__":
     end = time.time()
     print end - start
 
+    maxSamples = 1000
 
     testStates = np.copy(states)
     ranges = np.array([(10, -20), (0, -20), (10, -20), (math.pi, 0),
@@ -343,14 +344,14 @@ if __name__ == "__main__":
 
     # For now, only look at the first 1k states.
     # discreteStates = discretizeStates(testStates, binScales)[0:1000]
-    discreteStates = discretizeUnscaledStates(testStates, ranges, binScales)[0:2000]
+    discreteStates = discretizeUnscaledStates(testStates, ranges, binScales)[0:maxSamples]
     filteredStates, filterBooleans = filterUnscaledDiscreteStates(discreteStates, numBins)
     print 'Maximum state values'
-    print np.max(filteredStates, axis=0)
+    print np.max(filteredStates[filterBooleans], axis=0)
     print 'Minimum state values'
-    print np.min(filteredStates, axis=0)
+    print np.min(filteredStates[filterBooleans], axis=0)
 
-    realStates = discretizeStates(states, binScales)
+    realStates = discretizeStates(states, binScales)[0:maxSamples]
     print "States discretized"
     tree = generateDistTree(realStates, 0.5)
     print "Tree generated"
