@@ -123,6 +123,12 @@ def getBinScales(ranges, numBins):
     binScales = binWidths/numBins
     return binScales
 
+def shiftAngle(states, axis, amount):
+    n = states.shape[0]
+    for i in xrange(n):
+        if states[i, axis] < 0:
+            states[i, axis] += amount
+    return states
 
 def createStates(data):
     '''
@@ -333,9 +339,29 @@ def loadFiles(MAX_STATE):
         data = np.load(file)
         start = time.time()
         states = createStates(data)[0:MAX_STATE]
-        allStates = np.vertcat(allStates, states)
+        allStates = np.vstack((allStates, states))
         end = time.time()
         print end - start
+    return allStates
+
+def countFilteredOut(states, numBins):
+    count = 0
+    n = 700
+    print states.shape
+    booleanFiltered = np.ones((n, 1))
+    for i in xrange(n):
+        valid = True
+        for j in xrange(states.shape[1]):
+            if (states[i][j] >= numBins[j]) or (states[i][j] < 0):
+                valid = False
+                booleanFiltered[i] = 0
+                break
+        if valid:
+            count += 1
+            print 1, '              ', i
+        else:
+            print 0#, '              ', i
+    return count, booleanFiltered
 
 if __name__ == "__main__":
 
@@ -355,16 +381,23 @@ if __name__ == "__main__":
     # pdb.set_trace()
 
     testStates = np.copy(states)
-    ranges = np.array([(10, -20), (0, -20), (10, -20), (math.pi, 0),
-                       (math.pi, -math.pi), (math.pi, 0), (math.pi, -math.pi)])
+    testStates = shiftAngle(testStates, 6, 2*math.pi)
+    # ranges = np.array([(10, -20), (0, -20), (10, -20), (math.pi, 0),
+    #                    (math.pi, -math.pi), (math.pi, 0), (math.pi, -math.pi)])
+    ranges = np.array([(45, 15), (15, -20), (25,-5), (math.pi, 0.2), (math.pi + 0.5, -math.pi + 0.4), (math.pi, 0.2), (2*math.pi, 0)])
     numBins = np.array([20, 20, 20, 5, 5, 5, 5])
     binWidths = np.abs(ranges[:, 0]) + np.abs(ranges[:, 1])
     binScales = binWidths/numBins
     print binScales
 
-    # For now, only look at the first 1k states.
+    # For now, only look at the first 2k states.
+    # discreteStates = discretizeStates(testStates, binScales)[0:1000]
     discreteStates = discretizeUnscaledStates(testStates, ranges, binScales)
     filteredStates, filterBooleans = filterUnscaledDiscreteStates(discreteStates, numBins)
+
+    # import pdb
+    # pdb.set_trace()
+
     print 'Maximum state values'
     print np.max(filteredStates[filterBooleans], axis=0)
     print 'Minimum state values'
@@ -374,14 +407,14 @@ if __name__ == "__main__":
     print "States discretized"
     tree = generateDistTree(realStates, 0.5)
     print "Tree generated"
-    # rewards = generateRewards(realStates, tree, 0.5, 0.5)
-    # print "Rewards generated"
+    rewards = generateRewards(realStates, tree, 0.5, 0.5)
+    print "Rewards generated"
 
     actions = computeActions(realStates)
     print "actions generated"
 
-    np.savez('/home/rbedi/cs238/ligand-rl/' + dataId + '_data',
-             # rewards=rewards,
+    np.savez('/home/rbedi/cs238/ligand-rl/' + 'all_A_B' + '_data',
+             rewards=rewards,
              actions=actions,
              discreteStates=discreteStates,
              binScales=binScales,
