@@ -325,7 +325,7 @@ def reconstructStates(discreteStates, ranges, binScales):
 
 def loadFiles(MAX_STATE):
     import glob
-    PATH = '/home/rbedi/cs238/ligand-rl/data/*npz'
+    PATH = 'C:/Users/Alex Lin/Documents/AA228/finalproject/ligand-rl/data/*npz'
     files = glob.glob(PATH)
     allStates = np.zeros((0, 7))
     for file in files:
