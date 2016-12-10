@@ -130,6 +130,23 @@ def shiftAngle(states, axis, amount):
             states[i, axis] += amount
     return states
 
+def stateToLigandPos(state, ranges, binScales):
+    r = 8
+
+    scaledState = state*binScales
+    minRanges = np.transpose(ranges[:,1])
+    shiftedState = scaledState + minRanges
+
+    x, y, z, theta1, phi1, theta2, phi2 = shiftedState
+    zeroL2 = sphericalToCartesian(np.array([r, theta1, phi1]))
+    zeroL3 = sphericalToCartesian(np.array([r, theta2, phi2]))
+
+    L1 = np.array([x, y, z])
+    L2 = L1 + zeroL2
+    L3 = L1 + zeroL3
+
+    return L1, L2, L3
+
 def createStates(data):
     '''
     Takes in a saved data file and constructs a state
