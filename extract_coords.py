@@ -31,7 +31,7 @@ def export_sel(molid, sel_descriptor):
     the selection of atoms specified by sel
     '''
     sel_pos = []
-    num_frames = 4  #vmd.molecule.numframes(molid)
+    num_frames = vmd.molecule.numframes(molid)
     for frame in range(num_frames):
         frame_data = np.copy(vmd.vmdnumpy.timestep(molid, frame))
         sel = vmd.vmdnumpy.atomselect(molid, frame, sel_descriptor)

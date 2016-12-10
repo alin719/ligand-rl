@@ -111,6 +111,8 @@ def discretizeUnscaledStates(states, ranges, binScales):
     This is to be used for input to transition matrices etc
     '''
     mins = ranges[:, 1]
+    print states.shape
+    print 'MIN SHAPE: ', mins.shape
     states -= np.transpose(mins)
     states = np.round(states/binScales)
     return states
@@ -320,19 +322,37 @@ def reconstructStates(discreteStates, ranges, binScales):
     reconstructedStates = reconstructedStates - mins
     return reconstructedStates
 
+
+def loadFiles(MAX_STATE):
+    import glob
+    PATH = '/home/rbedi/cs238/ligand-rl/data/*npz'
+    files = glob.glob(PATH)
+    allStates = np.zeros((0, 7))
+    for file in files:
+        print file
+        data = np.load(file)
+        start = time.time()
+        states = createStates(data)[0:MAX_STATE]
+        allStates = np.vertcat(allStates, states)
+        end = time.time()
+        print end - start
+
 if __name__ == "__main__":
 
-    dataFile = sys.argv[1]
+    # dataFile = sys.argv[1]
+    # MAX_STATE = int(sys.argv[2])
 
-    dataId = ''.join(dataFile.split('-')[1:3])
+    # dataId = ''.join(dataFile.split('/')[-1].split('-')[1:3])
 
-    data = np.load(dataFile)
-    start = time.time()
-    states = createStates(data)
-    end = time.time()
-    print end - start
+    # data = np.load(dataFile)
+    # start = time.time()
+    # states = createStates(data)[0:MAX_STATE]
+    # end = time.time()
+    # print end - start
 
-    maxSamples = 1000
+    states = loadFiles(2000)
+    # import pdb
+    # pdb.set_trace()
 
     testStates = np.copy(states)
     ranges = np.array([(10, -20), (0, -20), (10, -20), (math.pi, 0),
@@ -343,8 +363,7 @@ if __name__ == "__main__":
     print binScales
 
     # For now, only look at the first 1k states.
-    # discreteStates = discretizeStates(testStates, binScales)[0:1000]
-    discreteStates = discretizeUnscaledStates(testStates, ranges, binScales)[0:maxSamples]
+    discreteStates = discretizeUnscaledStates(testStates, ranges, binScales)
     filteredStates, filterBooleans = filterUnscaledDiscreteStates(discreteStates, numBins)
     print 'Maximum state values'
     print np.max(filteredStates[filterBooleans], axis=0)
@@ -355,14 +374,14 @@ if __name__ == "__main__":
     print "States discretized"
     tree = generateDistTree(realStates, 0.5)
     print "Tree generated"
-    rewards = generateRewards(realStates, tree, 0.5, 0.5)
-    print "Rewards generated"
+    # rewards = generateRewards(realStates, tree, 0.5, 0.5)
+    # print "Rewards generated"
 
     actions = computeActions(realStates)
     print "actions generated"
 
-    np.savez(dataId + '_data',
-             rewards=rewards,
+    np.savez('/home/rbedi/cs238/ligand-rl/' + dataId + '_data',
+             # rewards=rewards,
              actions=actions,
              discreteStates=discreteStates,
              binScales=binScales,
