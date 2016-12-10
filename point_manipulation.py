@@ -323,10 +323,11 @@ def reconstructStates(discreteStates, ranges, binScales):
 
 def loadFiles(MAX_STATE):
     import glob
-    PATH = '/home/rbedi/cs238/ligand-rl/data'
+    PATH = '/home/rbedi/cs238/ligand-rl/data/*npz'
     files = glob.glob(PATH)
-    allStates = np.array()
+    allStates = np.zeros((0, 7))
     for file in files:
+        print file
         data = np.load(file)
         start = time.time()
         states = createStates(data)[0:MAX_STATE]
