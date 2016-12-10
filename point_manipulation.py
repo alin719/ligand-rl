@@ -320,18 +320,36 @@ def reconstructStates(discreteStates, ranges, binScales):
     reconstructedStates = reconstructedStates - mins
     return reconstructedStates
 
+
+def loadFiles(MAX_STATE):
+    import glob
+    PATH = '/home/rbedi/cs238/ligand-rl/data'
+    files = glob.glob(PATH)
+    allStates = np.array()
+    for file in files:
+        data = np.load(file)
+        start = time.time()
+        states = createStates(data)[0:MAX_STATE]
+        allStates = np.vertcat(allStates, states)
+        end = time.time()
+        print end - start
+
 if __name__ == "__main__":
 
-    dataFile = sys.argv[1]
-    MAX_STATE = int(sys.argv[2])
+    # dataFile = sys.argv[1]
+    # MAX_STATE = int(sys.argv[2])
 
-    dataId = ''.join(dataFile.split('/')[-1].split('-')[1:3])
+    # dataId = ''.join(dataFile.split('/')[-1].split('-')[1:3])
 
-    data = np.load(dataFile)
-    start = time.time()
-    states = createStates(data)[0:MAX_STATE]
-    end = time.time()
-    print end - start
+    # data = np.load(dataFile)
+    # start = time.time()
+    # states = createStates(data)[0:MAX_STATE]
+    # end = time.time()
+    # print end - start
+
+    states = loadFiles(2000)
+    import pdb
+    pdb.set_trace()
 
     testStates = np.copy(states)
     ranges = np.array([(10, -20), (0, -20), (10, -20), (math.pi, 0),
