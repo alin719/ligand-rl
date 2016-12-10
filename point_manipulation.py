@@ -419,3 +419,4 @@ if __name__ == "__main__":
              discreteStates=discreteStates,
              binScales=binScales,
              filtered=filterBooleans)
+>>>>>>> 8faa95fbc11bb51038bd8422647ec864d31e3a49
