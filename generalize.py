@@ -11,7 +11,7 @@ class Generalizer(object):
         tflearn.init_graph(num_cores=1, gpu_memory_fraction=0.5)
 
         net = tflearn.input_data(shape=[None, 7])
-        net = tflearn.fully_connected(net, 256)
+        net = tflearn.fully_connected(net, 32)
         net = tflearn.fully_connected(net, 15, activation='softmax')
         net = tflearn.regression(net, optimizer='adam', loss='categorical_crossentropy',
                                  batch_size=50, learning_rate=0.01)
@@ -38,6 +38,6 @@ if __name__ == "__main__":
     y = np.copy(data['y'])
 
     gen = Generalizer()
-    gen.train(inputs, y)
+    # gen.train(inputs, y)
 
-    gen.model.save(dataId + '_weights')
+    # gen.model.save(dataId + '_weights')
