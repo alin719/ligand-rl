@@ -28,8 +28,6 @@ def idxToAction(idx):
     idx -= 1
     return ((idx%2)*2 - 1, idx/2)
 
-
-
 # test = [5,14,12,3,1,2,1]
 # print stateToIdx(test)
 # print idxToState(stateToIdx(test)).astype(int)
