@@ -1,5 +1,6 @@
 import numpy as np
 import state2idx as s2i
+import generalize
 
 def createActionDict():
     actionDict = {}
@@ -17,7 +18,7 @@ def actionToVector(action):
     actionVector[dim] = direction
     return actionVector
 
-def isStateInbounds(state, ranges):
+def isStateInbounds(state, numBins):
     isInbounds = True
     for i in xrange(state.shape[1]):
         if (curState[i] >= numBins[i]) or (curState[i] < 0):
@@ -25,26 +26,44 @@ def isStateInbounds(state, ranges):
             break
     return isInbounds
 
-def rolloutPolicy(startState, ranges, numIters=1000, edgeThreshold=200):
+def getNextEnumAction(G, state, actionDict):
+	i = np.random.rand()
+	epsilon = 0.2
+	if i <= epsilon:
+		return getRandomAction(actionDict)
+	return G.getAction(state)
+
+def rolloutPolicy(G, startState, numBins, numIters=1000, edgeThreshold=200):
     curState = startState
     statesVisited = []
     edgeCounter = 0
     actionDict = createActionDict()
     for i in xrange(numIters):
-        curAction = actionDict[getNextEnumAction(curState)]
+        curAction = actionDict[getNextEnumAction(G, curState, actionDict)]
         actionVector = actionToVector(curAction)
         nextState = curState + actionVector
 
-        #Policy-given 
         if not isStateInbounds(nextState):
             edgeCounter += 1
             while not isStateInbounds(nextState):
                 newAction = getRandomAction(actionDict)
                 newActionVector = actionToVector(newAction)
-                nextState = curState + actionVector
+                nextState = curState + newActionVector
 
         statesVisited.append(curState)
         curState = nextState
         if edgeCounter > edgeThreshold:
             break
     return statesVisited
+
+if __name__ == "__main__":
+	weightsFilename = 'all_A_B_05_05_05_data_policynpz_weights'
+	G = generalize.Generalizer(weightsFilename)
+    numBins = np.array([20, 20, 20, 5, 5, 5, 5])
+
+	startState = np.array([])
+	
+	trajectory = rolloutPolicy(G, startState, numBins, 1000, 200)
+	print trajectory
+    np.savez('/home/rbedi/cs238/ligand-rl/' + 'rollout_trajectory',
+         trajectory=trajectory)
