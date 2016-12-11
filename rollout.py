@@ -1,6 +1,6 @@
 import numpy as np
 import state2idx as s2i
-import generalize
+# import generalize
 
 def createActionDict():
     actionDict = {}
@@ -8,23 +8,21 @@ def createActionDict():
         actionDict[i] = s2i.idxToAction(i)
     return actionDict
 
-def getRandomAction(actionDict):
+def getRandomEnumAction(actionDict):
     idx = np.random.randint(0, len(actionDict))
-    return actionDict[idx]
+    return idx
 
 def actionToVector(action):
     direction = action[0]
     dim = action[1]
     actionVector = np.zeros((1,7))
-    # import pdb
-    # pdb.set_trace()
     actionVector[0, dim] = direction
-    return actionVector
+    return actionVector[0]
 
 def isStateInbounds(state, numBins):
     isInbounds = True
-    for i in xrange(state.shape[1]):
-        if (state[0, i] >= numBins[i]) or (state[0, i] < 0):
+    for i in xrange(len(state)):
+        if (state[i] >= numBins[i]) or (state[i] < 0):
             isInbounds = False
             break
     return isInbounds
@@ -34,7 +32,7 @@ def getNextEnumAction(G, state, actionDict):
     i = np.random.rand()
     epsilon = 0.2
     if i <= epsilon:
-        return getRandomAction(actionDict)
+        return getRandomEnumAction(actionDict)
     return G.getAction(state.reshape((1, 7)))
 
 
@@ -51,7 +49,7 @@ def rolloutPolicy(G, startState, numBins, numIters=1000, edgeThreshold=200):
         if not isStateInbounds(nextState, numBins):
             edgeCounter += 1
             while not isStateInbounds(nextState, numBins):
-                newAction = getRandomAction(actionDict)
+                newAction = actionDict[getRandomEnumAction(actionDict)]
                 newActionVector = actionToVector(newAction)
                 nextState = curState + newActionVector
 
@@ -67,8 +65,10 @@ if __name__ == "__main__":
     numBins = np.array([20, 20, 20, 5, 5, 5, 5])
 
     startState = np.array([4,3,16,3,2,2,3])
+    print startState
     
     trajectory = rolloutPolicy(G, startState, numBins, 1000, 200)
+
     print trajectory
     np.savez('/home/rbedi/cs238/ligand-rl/' + 'rollout_trajectory',
          trajectory=trajectory)
